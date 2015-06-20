@@ -54,7 +54,14 @@ int main (void)
          //Mastercard starts with 51, 52, 53, 54, 55
          //Visa starts with 4
         case 16:
-            cardType = "MASTERCARD / VISA";
+            if ((cardNumber[0] == 5) && (cardNumber[1] > 0) && (cardNumber[1] < 6))
+            {
+                cardType = "MASTERCARD";
+            }
+            else if (cardNumber[0] == 4)
+            {
+                cardType = "VISA";
+            }
             break;
         default:
             //Print invalid and drop out if card doesn't have the right number of characters
