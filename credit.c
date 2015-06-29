@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 #include <cs50.h>
-#include <string.h>
 #include <math.h>
 
 /**
@@ -17,34 +16,44 @@
  */
 bool cardNumberIsValid (int cardNumber[], int length);
 
+/**
+ * returns the length of a long long number.
+ * note that this method returns a value that is ALREADY ZERO INDEXED
+ */
+int lengthOfNumber(long long number);
+
 int main (void)
 {
     //Get credit card number
     printf ("Enter credit card number: ");
-    string userEntry = GetString();
+    long long userEntry = GetLongLong();
     
     //Determine the card type based on the number of digits (default to INVALID)
     string cardType = "INVALID";
-    int length = strlen(userEntry);
+    int length = lengthOfNumber(userEntry);
     
-    //Convert string into array of ints (also account for ASCII value vs int value)
+    //Convert the long long into an array of ints
     int cardNumber [length];
-    for (int i = 0; i < length; i++)
+
+    for (int i = 0; i <= length; i++)
     {
-        cardNumber[i] = userEntry[i] - '0';
+        //Grab the last digit and then shift one place
+        cardNumber[i] = userEntry % 10;
+        userEntry /= 10;
     }
+    
     //Check card type and validity
     switch (length)
     {   
         //Visa always start with 4
-        case 13:
-            cardType = (cardNumber[0] == 4) ? "VISA" : "INVALID";
+        case 12:
+            cardType = (cardNumber[12] == 4) ? "VISA" : "INVALID";
             break;
         //AMEX always start with 34 or 37
-        case 15:
-            if (cardNumber[0] == 3)
+        case 14:
+            if (cardNumber[14] == 3)
             {
-                if ((cardNumber[1] == 4) || (cardNumber[1] == 7))
+                if ((cardNumber[13] == 4) || (cardNumber[13] == 7))
                 {
                     cardType = "AMEX";
                 }
@@ -53,12 +62,12 @@ int main (void)
          
          //Mastercard starts with 51, 52, 53, 54, 55
          //Visa starts with 4
-        case 16:
-            if ((cardNumber[0] == 5) && (cardNumber[1] > 0) && (cardNumber[1] < 6))
+        case 15:
+            if ((cardNumber[15] == 5) && (cardNumber[14] > 0) && (cardNumber[14] < 6))
             {
                 cardType = "MASTERCARD";
             }
-            else if (cardNumber[0] == 4)
+            else if (cardNumber[15] == 4)
             {
                 cardType = "VISA";
             }
@@ -72,7 +81,6 @@ int main (void)
     //Determine if the credit card has a valid number
     if (cardNumberIsValid(cardNumber, length))
     {
-        printf("Card type: ");
         printf("%s\n", cardType);
         return 0;
     }
@@ -84,16 +92,14 @@ int main (void)
 }
 
 bool cardNumberIsValid (int cardNumber[], int length)
-{
-    //Convert length to 0 indexed number
-    int indexLength = length - 1;
+{    
     //Work through the credit card number array
-    //Even numbers are to be summed
+    //Even numbers are to be summed (zero index)
     //Odd numbers are to be multiplied by 2 and then their digits summed
     int numberSum = 0;
-    for (int i = indexLength; i >=0; i--)
+    for (int i = 0; i <= length; i++)
     {
-        if ((indexLength - i) % 2 == 0)
+        if (i % 2 == 0)
         {
             //Must be even
             numberSum += cardNumber[i];
@@ -105,7 +111,7 @@ bool cardNumberIsValid (int cardNumber[], int length)
             numberSum += ((temporaryNumber / 10) + (temporaryNumber % 10));
         }
     }
-
+    
     //If last digit is 0, then return TRUE.  Otherwise return FALSE
     if (numberSum % 10 == 0)
     {
@@ -116,3 +122,16 @@ bool cardNumberIsValid (int cardNumber[], int length)
         return false;
     }
 }
+
+int lengthOfNumber(long long number)
+{
+    int i = 0;
+    while (number)
+    {
+        //Right shift the number one digit
+        number /= 10;
+        i++;
+    }
+    return i - 1;
+}
+
